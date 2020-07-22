@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <title>
+        Ball with Mouse Paddle!
+    </title>
+    <meta content="text/html;charset=utf-8" http-equiv="content-type">
+    <meta content="utf-8" http-equiv="encoding">
+    </head>
+    <body>
+        <canvas id="canvas" width="800" height="600"></canvas>
+
+     <script>
+         var canvas;
+         var canvasContext;
+         var frequencyPerFrame=30;
+         var ballX=75;
+         var ballY=75;
+         var ballSpeedX=5;
+         var ballSpeedY=7;
+         const PADDLE_WIDTH=100;
+         const PADDLE_THICKNESS=10;
+         const PADDLE_DIST_FROM_EDGE=60;
+         var paddleX=400;
+        
+         window.onload = function(){
+            canvas=document.getElementById('canvas');
+            canvasContext=canvas.getContext('2d');
+            update();
+             canvas.addEventListener('mousemove',updateMousePos);
+           
+         };
+         update = function(){
+             setInterval(updateCanvas,1000/frequencyPerFrame);
+         };
+         function updateMousePos(event){
+            var rect=canvas.getBoundingClientRect();
+            var root=document.documentElement;
+            var mouseX=event.clientX - rect.left - root.scrollLeft;
+//            var mouseY = event.clientY  -rect.top -  root.scrollTop;
+             paddleX=mouseX -PADDLE_WIDTH/2;
+         }
+         function drawRectangle(fillColor, topLeftX,topLeftY, boxWidth, boxHeight) {
+             canvasContext.fillStyle=fillColor;
+             canvasContext.fillRect(topLeftX,topLeftY, boxWidth, boxHeight);
+         }
+
+         function drawCricle(fillColor, topLeftX, topLeftY, radius) {
+             canvasContext.fillStyle=fillColor;
+             canvasContext.beginPath();
+             canvasContext.arc(topLeftX, topLeftY, radius,0,Math.PI*2,true);
+             canvasContext.fill();
+         }
+         function resetBall(){
+             ballX=canvas.width/2;
+             ballY=canvas.height/2;
+         }
+         function motionUtil() {
+             ballX+=ballSpeedX;
+             ballY+=ballSpeedY;
+             if(ballX>canvas.width){ //right side
+                 ballSpeedX*=-1;
+             }
+             if(ballX<0){    //left side
+                 ballSpeedX*=-1;
+             }
+          
+             if(ballY>canvas.height){ //below
+//                 ballSpeedY*=-1;
+                 resetBall();
+             }
+             if(ballY<0){   //above
+                 ballSpeedY*=-1;
+             }
+             
+             var paddleLeftEdgeX=paddleX;
+             var paddleRightEdgeX=paddleLeftEdgeX+PADDLE_WIDTH;
+             var paddleTopEdgeY=canvas.height-PADDLE_DIST_FROM_EDGE;
+             var paddleBottomEdgeY = paddleTopEdgeY+PADDLE_THICKNESS;
+             if(ballX>paddleLeftEdgeX&&
+               ballX<paddleRightEdgeX&&
+               ballY<paddleBottomEdgeY&&
+               ballY>paddleTopEdgeY){
+                 ballSpeedY*=-1;
+                 
+                 var centerOfPaddleX = paddleX + PADDLE_WIDTH/2;
+                 var ballDistFromPaddlwCenterX = ballX - centerOfPaddleX;
+                 ballSpeedX= ballDistFromPaddlwCenterX*0.35;
+             }
+         }
+
+         function drawUtil() {
+             drawRectangle('black',0,0, canvas.width,canvas.height); //clear screen
+             drawRectangle('white',paddleX,canvas.height-PADDLE_DIST_FROM_EDGE, PADDLE_WIDTH,PADDLE_THICKNESS);
+             drawCricle('white',ballX,ballY,10); //draw ball
+         }
+
+         updateCanvas = function(){
+             motionUtil();
+             drawUtil();
+         }
+     </script>
+    </body>
+   
+</html>
